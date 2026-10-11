@@ -42,10 +42,12 @@ class FilterParser(
 
     fun convertIntCriterionInput(it: Map<String, *>?): IntCriterionInput? =
         if (it != null) {
-            val values = it["value"] as Map<String, *>?
+            // The web UI nests the values (`"value": {"value": 1}`), but a filter saved through the API
+            // may use the GraphQL input format (`"value": 1`)
+            val values = it["value"] as? Map<String, *> ?: it
             IntCriterionInput(
-                value = values?.get("value")?.toString()?.toInt() ?: 0,
-                value2 = Optional.presentIfNotNull(values?.get("value2")?.toString()?.toInt()),
+                value = values["value"]?.toString()?.toInt() ?: 0,
+                value2 = Optional.presentIfNotNull(values["value2"]?.toString()?.toInt()),
                 modifier = CriterionModifier.valueOf(it["modifier"]!! as String),
             )
         } else {
@@ -54,10 +56,11 @@ class FilterParser(
 
     fun convertFloatCriterionInput(it: Map<String, *>?): FloatCriterionInput? =
         if (it != null) {
-            val values = it["value"] as Map<String, *>? // Might be an int or double
+            // Might be an int or double, might be nested like convertIntCriterionInput
+            val values = it["value"] as? Map<String, *> ?: it
             FloatCriterionInput(
-                value = values?.get("value")?.toString()?.toDouble() ?: 0.0,
-                value2 = Optional.presentIfNotNull(values?.get("value2")?.toString()?.toDouble()),
+                value = values["value"]?.toString()?.toDouble() ?: 0.0,
+                value2 = Optional.presentIfNotNull(values["value2"]?.toString()?.toDouble()),
                 modifier = CriterionModifier.valueOf(it["modifier"]!! as String),
             )
         } else {
@@ -302,7 +305,7 @@ class FilterParser(
             "7k" -> ResolutionEnum.SEVEN_K
             "8k" -> ResolutionEnum.EIGHT_K
             "Huge" -> ResolutionEnum.HUGE
-            else -> ResolutionEnum.UNKNOWN__
+            else -> ResolutionEnum.safeValueOf(str) // GraphQL enum name, eg FOUR_K
         }
 
     fun convertResolutionCriterionInput(it: Map<String, *>?): ResolutionCriterionInput? =

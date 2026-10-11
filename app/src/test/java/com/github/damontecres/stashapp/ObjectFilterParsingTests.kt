@@ -13,12 +13,14 @@ import com.github.damontecres.stashapp.api.type.ImageFilterType
 import com.github.damontecres.stashapp.api.type.IntCriterionInput
 import com.github.damontecres.stashapp.api.type.MultiCriterionInput
 import com.github.damontecres.stashapp.api.type.PerformerFilterType
+import com.github.damontecres.stashapp.api.type.ResolutionEnum
 import com.github.damontecres.stashapp.api.type.SceneFilterType
 import com.github.damontecres.stashapp.api.type.StashDataFilter
 import com.github.damontecres.stashapp.api.type.StudioFilterType
 import com.github.damontecres.stashapp.api.type.TagFilterType
 import com.github.damontecres.stashapp.data.DataType
 import com.github.damontecres.stashapp.filter.output.FilterWriter
+import com.github.damontecres.stashapp.suppliers.toFilterArgs
 import com.github.damontecres.stashapp.util.FilterParser
 import com.github.damontecres.stashapp.util.OptionalSerializersModule
 import com.github.damontecres.stashapp.util.Version
@@ -148,6 +150,32 @@ class ObjectFilterParsingTests {
             FilterParser(Version.MINIMUM_STASH_VERSION).convertSceneFilterType(savedFilterData.object_filter)
         Assert.assertNotNull(sceneFilter!!)
         Assert.assertEquals(FilterMode.SCENES, savedFilterData.mode)
+    }
+
+    /**
+     * A saved filter created through the saveFilter mutation stores the object filter in the
+     * GraphQL input format (eg `"value": 0`) instead of the format the web UI uses
+     * (eg `"value": {"value": 0}`)
+     */
+    @Test
+    fun testSceneFilterApiFormat() {
+        val savedFilterData = getSavedFilterData("scene_savedfilter_api_format.json")
+        val sceneFilter = savedFilterData.toFilterArgs(filterParser).objectFilter as SceneFilterType
+        Assert.assertEquals(FilterMode.SCENES, savedFilterData.mode)
+
+        val performers = sceneFilter.performers.getOrThrow()!!
+        Assert.assertEquals(CriterionModifier.INCLUDES, performers.modifier)
+        Assert.assertEquals(18, performers.value.getOrThrow()!!.size)
+        Assert.assertEquals("1169", performers.value.getOrThrow()!!.first())
+
+        val playCount = sceneFilter.play_count.getOrThrow()!!
+        Assert.assertEquals(CriterionModifier.EQUALS, playCount.modifier)
+        Assert.assertEquals(0, playCount.value)
+        Assert.assertNull(playCount.value2.getOrNull())
+
+        val resolution = sceneFilter.resolution.getOrThrow()!!
+        Assert.assertEquals(CriterionModifier.EQUALS, resolution.modifier)
+        Assert.assertEquals(ResolutionEnum.FOUR_K, resolution.value)
     }
 
     @Test

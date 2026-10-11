@@ -1,0 +1,52 @@
+{
+  "data": {
+    "findSavedFilter": {
+      "id": "9",
+      "mode": "SCENES",
+      "name": "2160p Unwatched - Likely to Enjoy",
+      "find_filter": {
+        "q": null,
+        "page": null,
+        "per_page": 40,
+        "sort": "date",
+        "direction": "DESC",
+        "__typename": "SavedFindFilterType"
+      },
+      "object_filter": {
+        "performers": {
+          "modifier": "INCLUDES",
+          "value": [
+            "1169",
+            "107",
+            "2792",
+            "1735",
+            "2111",
+            "2836",
+            "108",
+            "3128",
+            "1573",
+            "1307",
+            "1851",
+            "325",
+            "2453",
+            "126",
+            "2621",
+            "2799",
+            "2540",
+            "3062"
+          ]
+        },
+        "play_count": {
+          "modifier": "EQUALS",
+          "value": 0
+        },
+        "resolution": {
+          "modifier": "EQUALS",
+          "value": "FOUR_K"
+        }
+      },
+      "ui_options": null,
+      "__typename": "SavedFilter"
+    }
+  }
+}

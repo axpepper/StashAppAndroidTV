@@ -1,5 +1,7 @@
 package com.github.damontecres.stashapp.ui.components
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,6 +25,8 @@ import com.github.damontecres.stashapp.util.LoggingCoroutineExceptionHandler
 import com.github.damontecres.stashapp.util.QueryEngine
 import com.github.damontecres.stashapp.util.StashServer
 import kotlinx.coroutines.launch
+
+private const val TAG = "SavedFiltersButton"
 
 @Composable
 fun SavedFiltersButton(
@@ -73,9 +77,24 @@ fun SavedFiltersButton(
     )
     dialogItems.add(DialogItem.divider())
     dialogItems.addAll(
-        savedFilters.sortedBy { it.name }.map {
-            DialogItem(it.name) {
-                onFilterChange.invoke(it.toFilterArgs(filterParser))
+        savedFilters.sortedBy { it.name }.map { savedFilter ->
+            DialogItem(savedFilter.name) {
+                val filterArgs =
+                    try {
+                        savedFilter.toFilterArgs(filterParser)
+                    } catch (ex: Exception) {
+                        Log.e(TAG, "Exception parsing filter ${savedFilter.id}", ex)
+                        Toast
+                            .makeText(
+                                context,
+                                "Error with filter ${savedFilter.id}! Probably a bug: ${ex.message}",
+                                Toast.LENGTH_LONG,
+                            ).show()
+                        null
+                    }
+                if (filterArgs != null) {
+                    onFilterChange.invoke(filterArgs)
+                }
             }
         },
     )

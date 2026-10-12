@@ -1245,6 +1245,11 @@ class PlaybackKeyHandler(
             } else {
                 // When controller is visible, its buttons will handle pulsing
             }
+        } else if (it.key == Key.ChannelUp) {
+            // Channel up/down act as next/previous for remotes without media next/previous buttons
+            if (player.hasNextMediaItem()) player.seekToNextMediaItem()
+        } else if (it.key == Key.ChannelDown) {
+            if (player.hasPreviousMediaItem()) player.seekToPreviousMediaItem()
         } else if (isMedia(it)) {
             when (it.key) {
                 Key.MediaPlay -> {
